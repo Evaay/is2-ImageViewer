@@ -77,8 +77,47 @@ public class SwingImageDisplay extends JPanel implements ImageDisplay {
     @Override
     public void paint(Graphics g) {
         for (bufferedImage image : images) {
-            g.drawImage(image.image(), image.offset(), 0, null);
+            drawImage(g, image);
         }
+    }
+
+    private void drawImage(Graphics g, bufferedImage image) {
+        Resizer resizer = new Resizer(new Dimension(this.getWidth(), this.getHeight()));
+        Dimension dimensionResized = resizer.resize(new Dimension(image.image().getWidth(), image.image().getHeight()));
+
+        int y = (this.getHeight() - dimensionResized.height) / 2;
+
+        g.drawImage(image.image(), image.offset(), y, dimensionResized.width, dimensionResized.height, null);
+    }
+
+    public static class Resizer {
+        private final Dimension containerSize;
+
+        public Resizer(Dimension containerSize) {
+            this.containerSize = containerSize;
+        }
+
+        public Dimension resize(Dimension imageSize) {
+            double containerDimension = containerSize.getWidth() / containerSize.getHeight();
+            double imageDimension = imageSize.getWidth() / imageSize.getHeight();
+
+            if (containerDimension > imageDimension) {
+                return fitWidth(containerSize.getHeight(), imageDimension);
+            } else {
+                return fitHeight(containerSize.getWidth(), imageDimension);
+            }
+        }
+    }
+
+    public static Dimension fitWidth(double containerHeight, double imageDimension) {
+        double width = containerHeight * imageDimension;
+        return new Dimension((int) width,(int) containerHeight);
+    }
+
+    public static Dimension fitHeight(double containerWidth, double imageDimension) {
+        double height = containerWidth / imageDimension;
+        return new Dimension((int) containerWidth, (int) height);
+
     }
 
     private BufferedImage getBufferedImage(String imageName) {
